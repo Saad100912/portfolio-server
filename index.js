@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient } = require("mongodb");
+const ObjectId = require("mongodb").ObjectId;
 require("dotenv").config();
 
 const app = express();
@@ -21,11 +22,20 @@ async function run() {
         await client.connect();
         const database = client.db("portfolio");
         const projectCollection = database.collection("projects");
-
+        // Get all project data
         app.get("/projects", async (req, res) => {
             const projects = projectCollection.find({});
             const result = await projects.toArray();
             res.json(result);
+        });
+
+        // Get a single project data
+        app.get("/projects/:id", async (req, res) => {
+            console.log("API hit");
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const project = await projectCollection.findOne(query);
+            res.json(project);
         });
     } finally {
         // await client.close();
